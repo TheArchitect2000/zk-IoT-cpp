@@ -1,8 +1,8 @@
 {
-    "commitmentId": "8c031caed4985ccec5c94653bd95b804d99bd8e108371a9677cff5a2ebe312fc",
+    "commitmentId": "97560912a5462db005f4c92f72fa50a787de2f2c37c7e047808c50d83e1c863f",
     "deviceType": "Sensor",
     "deviceIdType": "MAC",
-    "deviceModel": "Siemense ",
+    "deviceModel": "Siemense",
     "manufacturer": "MHT",
     "softwareVersion": "1.2",
     "class": 1,
