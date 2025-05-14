@@ -12,11 +12,12 @@ main:
 	mov x18, #25
 mov x17, #159
 .global zkp_start
- zkp_start: nop
+zkp_start: nop
 mul x17, x17, x18
 add x17, x17, #28
 .global zkp_end
- zkp_end: nop
+zkp_end: nop
+
 // 0 "" 2
 #NO_APP
 	mov	w0, 0

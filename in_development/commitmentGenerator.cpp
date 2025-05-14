@@ -49,7 +49,7 @@ std::unordered_map<std::string, int> registerMap = {
 
 uint64_t n_i, n_g, m, n, p, g;
 
-std::string configFile = "device_config.json", setupFile, assemblyFile = "program.s", newAssemblyFile = "program_new.s";
+std::string configFilePath = "device_config.json", setupFilePath, assemblyFilePath = "program.s", newAssemblyFile = "program_new.s";
 
 std::vector<std::string> instructions;
 uint64_t Class;
@@ -60,12 +60,12 @@ string deviceModel;
 string manufacturer;
 string softwareVersion;
 
-// Function to read JSON config file and parse lines to read from assembly file
-std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFile, nlohmann::json &config) {
-  std::ifstream configFileStream(configFile, std::ifstream::binary);
+
+// Function to parse the device configuration
+std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFilePath, nlohmann::json &config) {
+  std::ifstream configFileStream(configFilePath, std::ifstream::binary);
   if (!configFileStream.is_open()) {
-      std::cerr << "Error opening config file: " << configFile << std::endl;
-      exit(EXIT_FAILURE);
+      throw std::runtime_error("Error opening config file: " + configFilePath);
   }
 
   configFileStream >> config;
@@ -84,7 +84,7 @@ std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFile, n
 
   std::ifstream classFileStream("class.json");
   if (!classFileStream.is_open()) {
-      std::cerr << "Could not open the file!" << std::endl;
+      throw std::runtime_error("Error opening class file: class.json");
   }
   nlohmann::json classJsonData;
   classFileStream >> classJsonData;
@@ -101,11 +101,10 @@ std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFile, n
 }
 
 // Function to read specified lines from assembly file
-std::vector<std::string> readAssemblyLines(const std::string &assemblyFile, uint64_t startLine, uint64_t endLine) {
-  std::ifstream assemblyFileStream(assemblyFile);
+std::vector<std::string> readAssemblyLines(const std::string &assemblyFilePath, uint64_t startLine, uint64_t endLine) {
+  std::ifstream assemblyFileStream(assemblyFilePath);
   if (!assemblyFileStream.is_open()) {
-      std::cerr << "Error opening assembly file: " << assemblyFile << std::endl;
-      exit(EXIT_FAILURE);
+        throw std::runtime_error("Error opening assembly file: " + assemblyFilePath);
   }
 
   std::vector<std::string> selectedLines;
@@ -113,208 +112,64 @@ std::vector<std::string> readAssemblyLines(const std::string &assemblyFile, uint
   uint64_t currentLineNumber = 1;
 
   while (std::getline(assemblyFileStream, line)) {
-      if (currentLineNumber >= startLine && currentLineNumber <= endLine) {
+      // if (currentLineNumber >= startLine && currentLineNumber <= endLine) {
           selectedLines.push_back(line);
-      }
+      // }
       ++currentLineNumber;
   }
 
   assemblyFileStream.close();
+  
+  if (selectedLines.empty()) {
+      throw std::runtime_error("No lines read from " + assemblyFilePath + " within specified range");
+  }
+
   return selectedLines;
 }
 
 vector<vector<uint64_t>> vector_z(2, vector<uint64_t>(2, 0ll));
 
-// Function to modify assembly file content and save to new file
-void modifyAndSaveAssembly(const std::string &assemblyFile, const std::string &newAssemblyFile, uint64_t startLine, uint64_t endLine) {
-  std::ifstream assemblyFileStream(assemblyFile);
-  if (!assemblyFileStream.is_open()) {
-      std::cerr << "Error opening assembly file: " << assemblyFile << std::endl;
-      exit(EXIT_FAILURE);
-  }
 
-  std::ofstream newAssemblyFileStream(newAssemblyFile);
-  if (!newAssemblyFileStream.is_open()) {
-      std::cerr << "Error creating new assembly file: " << newAssemblyFile << std::endl;
-      exit(EXIT_FAILURE);
-  }
+// Function to modify assembly code and return the modified lines
+std::vector<std::string> modifyAssembly(const std::vector<std::string> &originalLines, uint64_t startLine, uint64_t endLine) {
+    std::vector<std::string> modifiedLines;
 
-  std::string line;
-  uint64_t currentLineNumber = 1;
-  uint64_t index = 0;
-  uint64_t z_arrayList = 0;
-
-  vector<uint64_t> spaceSize(32, 8);
-  vector<uint64_t> rdList;
-  while (std::getline(assemblyFileStream, line)) {
-    if (currentLineNumber == startLine) {
-      newAssemblyFileStream << ".global zkp_start\n zkp_start: nop\n";
-      newAssemblyFileStream << line << std::endl;
-      instructions.push_back(line);
-    }
-    else if (currentLineNumber > startLine && currentLineNumber <= endLine) { //  endLine - 2 to add 
-      newAssemblyFileStream << line << std::endl;
-      instructions.push_back(line);
-    }
-    else if (currentLineNumber == endLine + 1) {
-      newAssemblyFileStream << ".global zkp_end\n zkp_end: nop\n";
-    }
-    else {
-      newAssemblyFileStream << line << std::endl;
-    }
-    /*// Insert variables before the specified lines
-    if (currentLineNumber == startLine) {
-      newAssemblyFileStream << "bl store_register_instances\n";
-      newAssemblyFileStream << line << std::endl;
-      std::stringstream ss(line);
-      std::string opcode, rd, leftStr, rightStr;
-      ss >> opcode >> rd >> leftStr >> rightStr;
-      rd = Polynomial::trim(rd);
-      rd = Polynomial::removeCommas(rd);
-      instructions.push_back(line);
-      rdList.push_back(registerMap[rd]);
-      newAssemblyFileStream << "ldr x9, =x" << std::to_string(registerMap[rd]) << "_array" << endl;
-      if(registerMap[rd] == 31) {
-        newAssemblyFileStream << "str sp, [x9, #" << std::to_string(spaceSize[registerMap[rd]]) << "]" << endl;
+    for (size_t i = 0; i < originalLines.size(); ++i) {
+      if (i + 1 == startLine) {
+          modifiedLines.push_back(".global zkp_start\nzkp_start: nop\n" + originalLines[i]);
+          instructions.push_back(originalLines[i]);
+      } else if (i + 1 > startLine && i + 1 <= endLine) {
+          modifiedLines.push_back(originalLines[i]);
+          instructions.push_back(originalLines[i]);
+      } else if (i + 1 == endLine + 1) {
+          modifiedLines.push_back(".global zkp_end\nzkp_end: nop\n" + originalLines[i]);
+      } else {
+          modifiedLines.push_back(originalLines[i]);
       }
-      else {
-        newAssemblyFileStream << "str x" << std::to_string(registerMap[rd]) << ", [x9, #" << std::to_string(spaceSize[registerMap[rd]]) << "]" << endl;
-      }
-      spaceSize[registerMap[rd]] += 8;
-    }
-    else if (currentLineNumber > startLine && currentLineNumber <= endLine) {
-    newAssemblyFileStream << line << std::endl;
-
-    std::stringstream ss(line);
-    std::string opcode, rd, leftStr, rightStr;
-    ss >> opcode >> rd >> leftStr >> rightStr;
-
-    rd = Polynomial::trim(rd);
-    rd = Polynomial::removeCommas(rd);
-    instructions.push_back(line);
-    rdList.push_back(registerMap[rd]);
-
-    newAssemblyFileStream << "ldr x9, =x" << std::to_string(registerMap[rd]) << "_array" << endl;
-
-
-    // Compute the offset and handle large values
-    uint64_t offset = spaceSize[registerMap[rd]];
-    if (offset <= 2040) {
-        // Offset fits within 12-bit range
-      if(registerMap[rd] == 31) {
-        newAssemblyFileStream << "str sp, [x9, #" << offset << "]" << endl;
-      }
-      else {
-        newAssemblyFileStream << "str x" << std::to_string(registerMap[rd]) << ", [x9, #" << offset << "]" << endl;
-      }
-
-    } else {
-        // Offset exceeds 12-bit range
-        newAssemblyFileStream << "mov x10, " << offset << endl;  // Load the offset into r1
-        newAssemblyFileStream << "add x10, x10, x9" << endl;      // Compute the effective address
-        if(registerMap[rd] == 31) {
-          newAssemblyFileStream << "str sp, [x10]" << endl;
-        }
-        else {
-          newAssemblyFileStream << "str x" << std::to_string(registerMap[rd]) << ", [x10]" << endl;
-        }
     }
 
-    // Increment the space size for the next usage
-    spaceSize[registerMap[rd]] += 8;
+    return modifiedLines;
 }
 
-
-    else if (currentLineNumber == endLine + 1){
-      newAssemblyFileStream << "ldr x9, =z_array" << endl;
-      newAssemblyFileStream << "mov x10, #1" << endl;
-      newAssemblyFileStream << "str x10, [x9]" << endl;
-
-      for(uint64_t i = 0; i < n_i; i++) {
-        newAssemblyFileStream << "ldr x9, =z_array" << endl;
-        newAssemblyFileStream << "ldr x10, =x" << std::to_string(i) << "_array" << endl;
-        newAssemblyFileStream << "ldr x11, [x10]" << endl;
-        newAssemblyFileStream << "str x11, [x9, #" << std::to_string((i+1)*8) << "]" << endl;
-      }
-      vector<uint64_t> spaceSizeZ(32, 8);
-      vector<uint64_t> yList;
-      
-      for (uint64_t i = 0; i < n_g; i++) {
-        spaceSizeZ[rdList[i]] += 8;
-        newAssemblyFileStream << "ldr x9, =z_array" << endl;
-        newAssemblyFileStream << "ldr x10, =x" << std::to_string(rdList[i]) << "_array" << endl;
-
-        // Compute effective address for large offsetLW in z_array
-        uint64_t offsetLW = spaceSizeZ[rdList[i]] - 8;
-        if (offsetLW <= 2040) {
-          newAssemblyFileStream << "ldr x11, [x10, #" << offsetLW << "]" << endl;
-        } else {
-          newAssemblyFileStream << "mov x16, #" << offsetLW << endl;  // Load offsetLW into r3
-          newAssemblyFileStream << "add x16, x16, x10" << endl;         // Compute the effective address
-          newAssemblyFileStream << "ldr x11, [x16]" << endl;          // Load the value
-        }
-
-        uint64_t offset = (n_i + i + 1) * 8;
-        if (offset <= 2040) {
-          newAssemblyFileStream << "str x11, [x9, #" << offset << "]" << endl;
-        } else {
-          // Offset exceeds 12-bit range, use temporary register
-          newAssemblyFileStream << "mov x16, #" << offset << endl;    // Load offset into r3  
-          newAssemblyFileStream << "add x16, x16, x9" << endl;        // Compute effective address  
-          newAssemblyFileStream << "str x11, [x16]" << endl;          // Store value at effective address  
-        }
-      }
-
-      newAssemblyFileStream << "bl proofGenerator\n";
-      newAssemblyFileStream << line << std::endl;
+// Function to write a vector of strings to a file
+void writeToFile(const std::string &filePath, const std::vector<std::string> &content) {
+    std::ofstream fileStream(filePath);
+    if (!fileStream.is_open()) {
+        throw std::runtime_error("Error opening file for writing: " + filePath);
     }
-    else {
-      newAssemblyFileStream << line << std::endl;
-    }*/
 
-    currentLineNumber++;
-  }
-/*
-  std::string assemblyCode = ".section .data\n";
-  assemblyCode += ".global z_array\nz_array:    .space " + std::to_string((n_i + n_g + 1) * 8) + "\n";
-
-  assemblyCode += "\n\n";
-  assemblyCode += ".section .data\n";  // `.data` for ARM, same as RISC-V
-  assemblyCode += ".align 3\n";  // `.data` for ARM, same as RISC-V
-
-  for (int i = 0; i < 32; i++) {  // ARM has 32 general-purpose registers (r0 to r15)
-      assemblyCode += "x" + std::to_string(i) + "_array:    .space " + std::to_string(spaceSize[i]) + "\n";
-  }
-
-
-assemblyCode += "\n    .text\n"
-                "      .globl store_register_instances\n"
-                "  store_register_instances:\n";
-
-for (int i = 0; i < 31; i++) { // ARM has 32 general-purpose registers (r0 to r15)
-    assemblyCode += "      ldr x10, =x" + std::to_string(i) + "_array\n";  // Load address of x_array
-    assemblyCode += "      str x" + std::to_string(i) + ", [x10]\n";
+    for (const auto &line : content) {
+        fileStream << line << "\n";
+    }
 }
-
-assemblyCode += "      ldr x10, =x31_array\n";  // Load address of x_array
-assemblyCode += "      str x30, [x10]\n";
-
-assemblyCode += "      ret\n";
-
-  newAssemblyFileStream << assemblyCode << std::endl;
-*/
-  assemblyFileStream.close();
-  newAssemblyFileStream.close();
-}
-
 
 void commitmentGenerator() {
-  setupFile = "data/setup";
-  setupFile += to_string(Class);
-  setupFile += ".json";
-  std::ifstream setupFileStream(setupFile);
+  setupFilePath = "data/setup";
+  setupFilePath += to_string(Class);
+  setupFilePath += ".json";
+  std::ifstream setupFileStream(setupFilePath);
   if (!setupFileStream.is_open()) {
-      std::cerr << "Could not open the file!" << std::endl;
+      throw std::runtime_error("Error opening setup file: " + setupFilePath);
   }
   nlohmann::json setupJsonData;
   setupFileStream >> setupJsonData;
@@ -322,10 +177,7 @@ void commitmentGenerator() {
   vector<uint64_t> ck = setupJsonData["ck"].get<vector<uint64_t>>();
   uint64_t vk = setupJsonData["vk"].get<uint64_t>();
 
-  
-
-
- for (const auto& instr : instructions) {
+  for (const auto& instr : instructions) {
     std::stringstream ss(instr);
     std::string opcode, rd, leftStr, rightStr;
     
@@ -351,7 +203,7 @@ void commitmentGenerator() {
   vector<vector<uint64_t>> A(n, vector<uint64_t>(n, 0ll));
   vector<vector<uint64_t>> B(n, vector<uint64_t>(n, 0ll));
   vector<vector<uint64_t>> C(n, vector<uint64_t>(n, 0ll));
-
+  
   vector<uint64_t> rd_latest_used(32, 0);
 
   // Fill matrices based on the instructions
@@ -696,21 +548,33 @@ void commitmentGenerator() {
 int main() {
   // TODO: Remove the hard coded file names and use the inputs from user
 
-  // std::string configFile, setupFile, assemblyFile, newAssemblyFile;
+  // std::string configFilePath, setupFilePath, assemblyFilePath, newAssemblyFile;
   // Input filenames
   // std::cout << "Enter the device config file name: ";
-  // std::cin >> configFile;
+  // std::cin >> configFilePath;
   // std::cout << "Enter setup file name: ";
-  // std::cin >> setupFile;
+  // std::cin >> setupFilePath;
   // std::cout << "Enter the program assembly file name: ";
-  // std::cin >> assemblyFile;
+  // std::cin >> assemblyFilePath;
   // std::cout << "Enter the output file name for modified assembly: ";
   // std::cin >> newAssemblyFile;
 
   nlohmann::json config;
-  auto [startLine, endLine] = parseDeviceConfig(configFile, config);
+  auto [startLine, endLine] = parseDeviceConfig(configFilePath, config);
+  cout << "startLine: " << startLine << endl;
+  cout << "startLine: " << endLine << endl;
+  // modifyAndSaveAssembly(assemblyFilePath, newAssemblyFile, startLine, endLine);
 
-  modifyAndSaveAssembly(assemblyFile, newAssemblyFile, startLine, endLine);
+  auto originalLines = readAssemblyLines(assemblyFilePath, startLine, endLine);
+  for (const auto& i : originalLines) {
+      std::cout << "originalLines: " << i << std::endl;
+  }
+
+  auto modifiedLines = modifyAssembly(originalLines, startLine, endLine);
+  for (const auto& j : modifiedLines) {
+      std::cout << "modifiedLines: " << j << std::endl;
+  }
+  writeToFile(newAssemblyFile, modifiedLines);
 
   std::cout << "Modified assembly file saved as: " << newAssemblyFile << std::endl;
 
