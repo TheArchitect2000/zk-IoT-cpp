@@ -886,31 +886,58 @@ void proofGenerator() {
   Polynomial::printPolynomial(h_3_x, "h3(x)");
 
   // Define random values based on s_x
-  uint64_t eta_w_hat = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 10, p), p);
-  uint64_t eta_z_hatA = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 11, p), p);
-  uint64_t eta_z_hatB = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 12, p), p);
-  uint64_t eta_z_hatC = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 13, p), p);
-  uint64_t eta_h_0_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 14, p), p);
-  uint64_t eta_s_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 15, p), p);
-  uint64_t eta_g_1_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 16, p), p);
-  uint64_t eta_h_1_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 17, p), p);
-  uint64_t eta_g_2_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 18, p), p);
-  uint64_t eta_h_2_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 19, p), p);
-  uint64_t eta_g_3_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 20, p), p);
-  uint64_t eta_h_3_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 21, p), p);
+  uint64_t eta_row_ahp_a = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 10, p), p);
+  uint64_t eta_col_ahp_a = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 11, p), p);
+  uint64_t eta_val_ahp_a = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 12, p), p);
+
+  uint64_t eta_row_ahp_b = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 13, p), p);
+  uint64_t eta_col_ahp_b = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 14, p), p);
+  uint64_t eta_val_ahp_b = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 15, p), p);
+
+  uint64_t eta_row_ahp_c = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 16, p), p);
+  uint64_t eta_col_ahp_c = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 17, p), p);
+  uint64_t eta_val_ahp_c = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 18, p), p);
+
+  uint64_t eta_w_hat = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 19, p), p);
+  uint64_t eta_z_hatA = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 20, p), p);
+  uint64_t eta_z_hatB = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 21, p), p);
+  uint64_t eta_z_hatC = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 22, p), p);
+  uint64_t eta_h_0_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 23, p), p);
+  uint64_t eta_s_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 24, p), p);
+  uint64_t eta_g_1_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 25, p), p);
+  uint64_t eta_h_1_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 26, p), p);
+  uint64_t eta_g_2_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 27, p), p);
+  uint64_t eta_h_2_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 28, p), p);
+  uint64_t eta_g_3_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 29, p), p);
+  uint64_t eta_h_3_x = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 30, p), p);
 
   // Initialize the polynomial p(x) by performing several polynomial operations and print
+  
+
   vector<uint64_t> p_x =
-    Polynomial::addPolynomials(
-      Polynomial::addPolynomials(Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(w_hat_x, eta_w_hat, p), Polynomial::multiplyPolynomialByNumber(z_hatA, eta_z_hatA, p), p),
-                                 Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(z_hatB, eta_z_hatB, p), Polynomial::multiplyPolynomialByNumber(z_hatC, eta_z_hatC, p), p), p),
-      Polynomial::addPolynomials(
-        Polynomial::addPolynomials(Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(h_0_x, eta_h_0_x, p), Polynomial::multiplyPolynomialByNumber(s_x, eta_s_x, p), p),
-                                   Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(g_1_x, eta_g_1_x, p), Polynomial::multiplyPolynomialByNumber(h_1_x, eta_h_1_x, p), p), p),
-        Polynomial::addPolynomials(Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(g_2_x, eta_g_2_x, p), Polynomial::multiplyPolynomialByNumber(h_2_x, eta_h_2_x, p), p),
-                                   Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(g_3_x, eta_g_3_x, p), Polynomial::multiplyPolynomialByNumber(h_3_x, eta_h_3_x, p), p), p),
-        p),
-      p);
+  Polynomial::addPolynomials(
+  Polynomial::addPolynomials(
+  Polynomial::addPolynomials(
+  Polynomial::addPolynomials(
+  Polynomial::addPolynomials(
+  Polynomial::addPolynomials(
+  Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(rowA_x, eta_row_ahp_a, p), Polynomial::multiplyPolynomialByNumber(colA_x, eta_col_ahp_a, p), p),
+  Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(valA_x, eta_val_ahp_a, p), Polynomial::multiplyPolynomialByNumber(rowB_x, eta_row_ahp_b, p), p), p),
+  Polynomial::addPolynomials(
+  Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(colB_x, eta_col_ahp_b, p), Polynomial::multiplyPolynomialByNumber(valB_x, eta_val_ahp_b, p), p),
+  Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(rowC_x, eta_row_ahp_c, p), Polynomial::multiplyPolynomialByNumber(colC_x, eta_col_ahp_c, p), p), p), p),
+  Polynomial::multiplyPolynomialByNumber(valC_x, eta_val_ahp_c, p), p),
+  
+  Polynomial::addPolynomials(
+  Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(w_hat_x, eta_w_hat, p), Polynomial::multiplyPolynomialByNumber(z_hatA, eta_z_hatA, p), p),
+  Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(z_hatB, eta_z_hatB, p), Polynomial::multiplyPolynomialByNumber(z_hatC, eta_z_hatC, p), p), p), p),
+  Polynomial::addPolynomials(
+  Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(h_0_x, eta_h_0_x, p), Polynomial::multiplyPolynomialByNumber(s_x, eta_s_x, p), p),
+  Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(g_1_x, eta_g_1_x, p), Polynomial::multiplyPolynomialByNumber(h_1_x, eta_h_1_x, p), p), p), p),
+  Polynomial::addPolynomials(
+  Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(g_2_x, eta_g_2_x, p), Polynomial::multiplyPolynomialByNumber(h_2_x, eta_h_2_x, p), p),
+  Polynomial::addPolynomials(Polynomial::multiplyPolynomialByNumber(g_3_x, eta_g_3_x, p), Polynomial::multiplyPolynomialByNumber(h_3_x, eta_h_3_x, p), p), p), p);
+
   Polynomial::printPolynomial(p_x, "p(x)");
   
   uint64_t x_prime = Polynomial::hashAndExtractLower4Bytes(Polynomial::evaluatePolynomial(s_x, 22, p), p);
