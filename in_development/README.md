@@ -22,12 +22,12 @@ int main() {
     return 0;
 }
 ```
-Save it as program.cpp and generate the assembly file:
+Save it as YOUR_PROGRAM.cpp and generate the assembly file:
 ```
-g++ -std=c++17 -S program.cpp -o program.s -lstdc++
+g++ -std=c++17 -S YOUR_PROGRAM.cpp -o YOUR_PROGRAM.s -lstdc++
 ```
 ### Step 1.2: Find the Instruction Line
-Open `program.s` and locate the first supported instruction line (like `mul` or `add`) after the `#APP` directive. This line number will be used to define the `code_block` in the device configuration.
+Open `YOUR_PROGRAM.s` and locate the first supported instruction line (like `mul` or `add`) after the `#APP` directive. This line number will be used to define the `code_block` in the device configuration.
 
 ### Step 1.3: Update the `device_config.json` File
 ```
@@ -50,9 +50,9 @@ Open `program.s` and locate the first supported instruction line (like `mul` or 
 * **`code_block`**: Line range in the assembly where the critical operations occur.
 
 ### Step 1.4: Run the Commitment Generator
-Ensure `program.s`, the `data` folder, and the `commitmentGenerator` binary are in the same directory:
+Ensure `YOUR_PROGRAM.s`, the `data` folder, `Class.json`, `device_config.json` and the `commitmentGenerator` binary are in the same directory:
 ```
-./commitmentGenerator
+./commitmentGenerator YOUR_PROGRAM.s
 ```
 ### Step 1.5: Build an Executable from the Updated Assembly
 After `commitmentGenerator` generates `program_new.s`, compile it into an executable:
