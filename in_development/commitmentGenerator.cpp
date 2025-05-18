@@ -25,6 +25,7 @@ using ordered_json = nlohmann::ordered_json;
 #include <unordered_map>
 #include <chrono>
 #include <iomanip>
+#include <sstream>
 
 using namespace std;
 
@@ -545,7 +546,7 @@ void commitmentGenerator() {
   }
 }
 
-int main() {
+int main(int argc, char* argv[]) {
   // TODO: Remove the hard coded file names and use the inputs from user
 
   // std::string configFilePath, setupFilePath, assemblyFilePath, newAssemblyFile;
@@ -558,7 +559,7 @@ int main() {
   // std::cin >> assemblyFilePath;
   // std::cout << "Enter the output file name for modified assembly: ";
   // std::cin >> newAssemblyFile;
-
+  assemblyFilePath = argv[1];
   nlohmann::json config;
   auto [startLine, endLine] = parseDeviceConfig(configFilePath, config);
   cout << "startLine: " << startLine << endl;
