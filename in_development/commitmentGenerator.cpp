@@ -560,6 +560,7 @@ int main(int argc, char* argv[]) {
   // std::cout << "Enter the output file name for modified assembly: ";
   // std::cin >> newAssemblyFile;
   assemblyFilePath = argv[1];
+  newAssemblyFile = assemblyFilePath + "_new.s";
   nlohmann::json config;
   auto [startLine, endLine] = parseDeviceConfig(configFilePath, config);
   cout << "startLine: " << startLine << endl;
