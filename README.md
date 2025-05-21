@@ -55,7 +55,7 @@ In this step, you’ll add the IOT2050 device to your user account on an IoT ser
 
 4. **Clone the Repository:**  
    ```bash
-   git clone https://github.com/TheArchitect2000/zkiot-arm-siemens-iot2050-c.git
+   git clone https://github.com/TheArchitect2000/ZKP-IoT-Arm-Siemens-IoT2050-C.git
    cd zkiot-arm-siemens-iot2050-c
    ```
 5. **Install the Device:**
