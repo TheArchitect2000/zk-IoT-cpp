@@ -66,7 +66,7 @@ string softwareVersion;
 std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFilePath, nlohmann::json &config) {
   std::ifstream configFileStream(configFilePath, std::ifstream::binary);
   if (!configFileStream.is_open()) {
-      throw std::runtime_error("Error opening config file: " + configFilePath);
+      throw std::runtime_error("commitmentGenerator cannot open " + configFilePath + " for reading proposes.\n");
   }
 
   configFileStream >> config;
@@ -85,7 +85,7 @@ std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFilePat
 
   std::ifstream classFileStream("class.json");
   if (!classFileStream.is_open()) {
-      throw std::runtime_error("Error opening class file: class.json");
+      throw std::runtime_error("commitmentGenerator cannot open class.json for reading proposes.\n");
   }
   nlohmann::json classJsonData;
   classFileStream >> classJsonData;
@@ -122,7 +122,7 @@ std::vector<std::string> readAssemblyLines(const std::string &assemblyFilePath, 
   assemblyFileStream.close();
   
   if (selectedLines.empty()) {
-      throw std::runtime_error("No lines read from " + assemblyFilePath + " within specified range");
+    throw std::runtime_error("The code_block range contains blank lines. Please check the device_config.json file.");
   }
 
   return selectedLines;
@@ -156,12 +156,14 @@ std::vector<std::string> modifyAssembly(const std::vector<std::string> &original
 void writeToFile(const std::string &filePath, const std::vector<std::string> &content) {
     std::ofstream fileStream(filePath);
     if (!fileStream.is_open()) {
-        throw std::runtime_error("Error opening file for writing: " + filePath);
+        throw std::runtime_error("commitmentGenerator cannot open " + filePath + "for writing proposes\n");
     }
 
     for (const auto &line : content) {
         fileStream << line << "\n";
     }
+    
+    cout << filePath << " is created successfully\n";
 }
 
 void commitmentGenerator() {
@@ -170,7 +172,7 @@ void commitmentGenerator() {
   setupFilePath += ".json";
   std::ifstream setupFileStream(setupFilePath);
   if (!setupFileStream.is_open()) {
-      throw std::runtime_error("Error opening setup file: " + setupFilePath);
+      throw std::runtime_error("commitmentGenerator cannot open " + setupFilePath + " for reading proposes.\n");
   }
   nlohmann::json setupJsonData;
   setupFileStream >> setupJsonData;
@@ -188,14 +190,14 @@ void commitmentGenerator() {
     rightStr = Polynomial::trim(rightStr);
     leftStr = Polynomial::removeCommas(leftStr);
     rightStr = Polynomial::removeCommas(rightStr);
-    cout << "opcode: " << opcode << "\tleftStr: " << leftStr << "\trightStr: " << rightStr << "\n";
+    // cout << "opcode: " << opcode << "\tleftStr: " << leftStr << "\trightStr: " << rightStr << "\n";
   }
-  cout << "Number of immediate instructions (n_i): " << n_i << endl;
-  cout << "Number of general instructions (n_g): " << n_g << endl;
+  // cout << "Number of immediate instructions (n_i): " << n_i << endl;
+  // cout << "Number of general instructions (n_g): " << n_g << endl;
 
   // Matrix order
   uint64_t t;
-  cout << "Matrix order: " << n << endl;
+  // cout << "Matrix order: " << n << endl;
 
   t = n_i + 1;
   // m = (((Polynomial::power(n, 2, p) - n) / 2) - ((Polynomial::power(t, 2, p) - t) / 2)) % p;
@@ -303,7 +305,7 @@ void commitmentGenerator() {
     }
     
     else {
-      cout << "!!! Undefined instruction in the defiend Line range !!!\n" << opcode << endl;
+      cout << "commitmentGenerator cannot recognize " << opcode << " instruction in the code_block range. The code_block range is defind in the device_config.json file.\n";
       std::exit(0);
     }
   }
@@ -509,9 +511,9 @@ void commitmentGenerator() {
   if (commitmentFile.is_open()) {
       commitmentFile << commitmentString;
       commitmentFile.close();
-      std::cout << "The " << commitmentFileName << " was successfully created\n";
+      std::cout << commitmentFileName << " is created successfully\n";
   } else {
-      std::cerr << "Error opening file for writing\n";
+      std::cerr << "commitmentGenerator cannot open " <<  commitmentFileName << "for writing proposes\n";
   }
 
   vector<vector<uint64_t>> nonZeroB;
@@ -540,9 +542,9 @@ void commitmentGenerator() {
   if (program_paramFile.is_open()) {
       program_paramFile << program_paramString;
       program_paramFile.close();
-      std::cout << "The " << paramFileName << " was successfully created\n";
+      std::cout << paramFileName << " is created successfully\n";
   } else {
-      std::cerr << "Error opening file for writing\n";
+      std::cerr << "commitmentGenerator cannot open " <<  paramFileName << "for writing proposes\n";
   }
 }
 
@@ -581,13 +583,12 @@ int main(int argc, char* argv[]) {
   for (const auto& j : modifiedLines) {
       std::cout << "modifiedLines: " << j << std::endl;
   }
-  writeToFile(newAssemblyFile, modifiedLines);
 
 
   // TODO: update this part to be dynamic
   commitmentGenerator();
 
-  cout << "The " << newAssemblyFile << " was successfully created\n";
+  writeToFile(newAssemblyFile, modifiedLines);
   
   return 0;
 }
