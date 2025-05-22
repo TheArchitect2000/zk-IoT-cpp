@@ -50,7 +50,7 @@ std::unordered_map<std::string, int> registerMap = {
 
 uint64_t n_i, n_g, m, n, p, g;
 
-std::string configFilePath = "device_config.json", setupFilePath, assemblyFilePath = "program.s", newAssemblyFile = "program_new.s";
+std::string configFilePath = "device_config.json", setupFilePath, assemblyFilePath = "program.s", newAssemblyFile = "program_new.s", commitmentFileName, paramFileName;
 
 std::vector<std::string> instructions;
 uint64_t Class;
@@ -505,11 +505,11 @@ void commitmentGenerator() {
   // Serialize JSON object to a string
   std::string commitmentString = commitment.dump(4);
   // Write JSON object to a file
-  std::ofstream commitmentFile("data/program_commitment.json");
+  std::ofstream commitmentFile(commitmentFileName);
   if (commitmentFile.is_open()) {
       commitmentFile << commitmentString;
       commitmentFile.close();
-      std::cout << "JSON data has been written to program_commitment.json\n";
+      std::cout << "The " << commitmentFileName << " was successfully created\n";
   } else {
       std::cerr << "Error opening file for writing\n";
   }
@@ -536,11 +536,11 @@ void commitmentGenerator() {
   // Serialize JSON object to a string
   std::string program_paramString = program_param.dump(4);
   // Write JSON object to a file
-  std::ofstream program_paramFile("data/program_param.json");
+  std::ofstream program_paramFile(paramFileName);
   if (program_paramFile.is_open()) {
       program_paramFile << program_paramString;
       program_paramFile.close();
-      std::cout << "JSON data has been written to program_param.json\n";
+      std::cout << "The " << paramFileName << " was successfully created\n";
   } else {
       std::cerr << "Error opening file for writing\n";
   }
@@ -562,6 +562,10 @@ int main(int argc, char* argv[]) {
   assemblyFilePath = argv[1];
   newAssemblyFile = assemblyFilePath;// + "_new.s";
   newAssemblyFile = newAssemblyFile.substr(0, newAssemblyFile.find_last_of('.')) + "_AddedFidesProofGen.s";
+  commitmentFileName = assemblyFilePath;
+  commitmentFileName = commitmentFileName.substr(0, commitmentFileName.find_last_of('.')) + "_commitment.json";
+  paramFileName = assemblyFilePath;
+  paramFileName = paramFileName.substr(0, paramFileName.find_last_of('.')) + "_param.json";
   nlohmann::json config;
   auto [startLine, endLine] = parseDeviceConfig(configFilePath, config);
   cout << "startLine: " << startLine << endl;
@@ -579,9 +583,11 @@ int main(int argc, char* argv[]) {
   }
   writeToFile(newAssemblyFile, modifiedLines);
 
-  std::cout << "Modified assembly file saved as: " << newAssemblyFile << std::endl;
 
   // TODO: update this part to be dynamic
   commitmentGenerator();
+
+  cout << "The " << newAssemblyFile << " was successfully created\n";
+  
   return 0;
 }
