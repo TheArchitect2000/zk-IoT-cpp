@@ -1,0 +1,75 @@
+2024-11-30 00:58:38,789 - INFO - Logging initialized.
+2024-11-30 00:58:38,789 - INFO - Loading model from remote repository.
+2024-11-30 01:00:03,765 - INFO - Logging initialized.
+2024-11-30 01:00:03,765 - INFO - Loading model from remote repository.
+2024-11-30 01:01:00,008 - INFO - Logging initialized.
+2024-11-30 01:01:00,008 - INFO - Loading model from remote repository.
+2024-11-30 01:15:21,808 - INFO - Saving model and processor locally.
+2024-11-30 01:17:05,145 - INFO - Starting analysis workflow for: Sample_images/Chest_sample1.jpg
+2024-11-30 01:17:05,146 - INFO - Loading image: Sample_images/Chest_sample1.jpg
+2024-11-30 01:17:05,609 - INFO - Processing prompt: Describe "Airway"
+2024-11-30 01:29:21,052 - INFO - Response generated for prompt: Describe "Airway"
+2024-11-30 01:29:21,054 - INFO - Processing prompt: Describe "Breathing"
+2024-11-30 02:02:19,618 - INFO - Response generated for prompt: Describe "Breathing"
+2024-11-30 02:02:19,622 - INFO - Processing prompt: Describe "Cardiac"
+2024-11-30 02:19:22,920 - INFO - Response generated for prompt: Describe "Cardiac"
+2024-11-30 02:19:22,923 - INFO - Processing prompt: Describe "Diaphragm"
+2024-11-30 02:45:30,575 - INFO - Response generated for prompt: Describe "Diaphragm"
+2024-11-30 02:45:30,577 - INFO - Processing prompt: Describe "Everything else (e.g., mediastinal contours, bones, soft tissues, tubes, valves, and pacemakers)"
+2024-11-30 03:00:46,196 - INFO - Response generated for prompt: Describe "Everything else (e.g., mediastinal contours, bones, soft tissues, tubes, valves, and pacemakers)"
+2024-11-30 08:07:14,525 - INFO - Logging initialized.
+2024-11-30 08:07:14,526 - INFO - Loading model from local directory.
+2024-11-30 08:07:16,066 - INFO - Starting analysis workflow for: Sample_images/Chest_sample1.jpg
+2024-11-30 08:07:16,066 - INFO - Loading image: Sample_images/Chest_sample1.jpg
+2024-11-30 08:07:16,081 - INFO - Processing prompt: Describe "Airway"
+2024-11-30 08:17:21,145 - INFO - Response generated for prompt: Describe "Airway"
+2024-11-30 08:17:21,147 - INFO - Processing prompt: Describe "Breathing"
+2024-11-30 08:45:30,435 - INFO - Response generated for prompt: Describe "Breathing"
+2024-11-30 08:45:30,437 - INFO - Processing prompt: Describe "Cardiac"
+2024-11-30 09:00:01,820 - INFO - Response generated for prompt: Describe "Cardiac"
+2024-11-30 09:00:01,822 - INFO - Processing prompt: Describe "Diaphragm"
+2024-11-30 09:22:57,433 - INFO - Response generated for prompt: Describe "Diaphragm"
+2024-11-30 09:22:57,435 - INFO - Processing prompt: Describe "Everything else (e.g., mediastinal contours, bones, soft tissues, tubes, valves, and pacemakers)"
+2024-11-30 09:35:54,523 - INFO - Response generated for prompt: Describe "Everything else (e.g., mediastinal contours, bones, soft tissues, tubes, valves, and pacemakers)"
+2024-12-01 01:24:22,923 - INFO - Logging initialized.
+2024-12-01 01:24:22,924 - INFO - Loading model from local directory.
+2024-12-01 01:24:24,426 - INFO - Starting analysis workflow for: Sample_images/Chest_sample1.jpg
+2024-12-01 01:24:24,426 - INFO - Loading image: Sample_images/Chest_sample1.jpg
+2024-12-01 01:24:24,449 - INFO - Processing prompt: Describe "Airway"
+2024-12-01 01:34:43,893 - INFO - Response generated for prompt: Describe "Airway"
+2024-12-01 01:34:43,898 - INFO - Processing prompt: Describe "Breathing"
+2024-12-01 02:02:21,894 - INFO - Response generated for prompt: Describe "Breathing"
+2024-12-01 02:02:21,899 - INFO - Processing prompt: Describe "Cardiac"
+2024-12-01 02:16:45,116 - INFO - Response generated for prompt: Describe "Cardiac"
+2024-12-01 02:16:45,119 - INFO - Processing prompt: Describe "Diaphragm"
+2024-12-01 02:40:11,739 - INFO - Response generated for prompt: Describe "Diaphragm"
+2024-12-01 02:40:11,741 - INFO - Processing prompt: Describe "Everything else (e.g., mediastinal contours, bones, soft tissues, tubes, valves, and pacemakers)"
+2024-12-01 02:53:06,851 - INFO - Response generated for prompt: Describe "Everything else (e.g., mediastinal contours, bones, soft tissues, tubes, valves, and pacemakers)"
+2024-12-06 02:20:03,022 - INFO - Logging initialized.
+2024-12-06 02:20:03,023 - INFO - Loading model from local directory.
+2024-12-06 02:20:04,262 - INFO - Starting analysis workflow for: Sample_images/Chest_sample1.jpg
+2024-12-06 02:20:04,263 - INFO - Loading image: Sample_images/Chest_sample1.jpg
+2024-12-06 02:20:04,287 - INFO - Processing prompt: Describe "Airway"
+2024-12-06 03:08:34,888 - INFO - Response generated for prompt: Describe "Airway"
+2024-12-06 03:08:34,890 - INFO - Processing prompt: Describe "Breathing"
+2024-12-06 06:10:15,335 - INFO - Response generated for prompt: Describe "Breathing"
+2024-12-06 06:10:15,336 - INFO - Processing prompt: Describe "Cardiac"
+2024-12-06 06:25:13,838 - INFO - Response generated for prompt: Describe "Cardiac"
+2024-12-06 06:25:13,840 - INFO - Processing prompt: Describe "Diaphragm"
+2024-12-06 06:49:29,194 - INFO - Response generated for prompt: Describe "Diaphragm"
+2024-12-06 06:49:29,196 - INFO - Processing prompt: Describe "Everything else (e.g., mediastinal contours, bones, soft tissues, tubes, valves, and pacemakers)"
+2024-12-06 07:03:50,697 - INFO - Response generated for prompt: Describe "Everything else (e.g., mediastinal contours, bones, soft tissues, tubes, valves, and pacemakers)"
+2024-12-06 11:00:03,377 - INFO - Logging initialized.
+2024-12-06 11:00:03,378 - INFO - Loading model from local directory.
+2024-12-06 11:00:04,497 - INFO - Starting analysis workflow for: Sample_images/Chest_sample1.jpg
+2024-12-06 11:00:04,497 - INFO - Loading image: Sample_images/Chest_sample1.jpg
+2024-12-06 11:00:04,522 - INFO - Processing prompt: Describe "Airway"
+2024-12-06 11:10:19,271 - INFO - Response generated for prompt: Describe "Airway"
+2024-12-06 11:10:19,273 - INFO - Processing prompt: Describe "Breathing"
+2024-12-06 11:37:46,836 - INFO - Response generated for prompt: Describe "Breathing"
+2024-12-06 11:37:46,838 - INFO - Processing prompt: Describe "Cardiac"
+2024-12-06 11:52:24,998 - INFO - Response generated for prompt: Describe "Cardiac"
+2024-12-06 11:52:25,000 - INFO - Processing prompt: Describe "Diaphragm"
+2024-12-06 12:15:29,688 - INFO - Response generated for prompt: Describe "Diaphragm"
+2024-12-06 12:15:29,691 - INFO - Processing prompt: Describe "Everything else (e.g., mediastinal contours, bones, soft tissues, tubes, valves, and pacemakers)"
+2024-12-06 13:04:21,808 - INFO - Response generated for prompt: Describe "Everything else (e.g., mediastinal contours, bones, soft tissues, tubes, valves, and pacemakers)"
