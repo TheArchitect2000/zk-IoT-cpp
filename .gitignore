@@ -1,4 +1,5 @@
-log
+ARM-method1/log
+ARM-method2/log
 broker_host.txt
 read_registers.cpp
 read_registers
