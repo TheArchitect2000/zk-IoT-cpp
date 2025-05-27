@@ -217,7 +217,7 @@ void commitmentGenerator() {
     uint64_t li = 0;
     uint64_t ri = 0;
 
-    if (opcode == "add" || opcode == "addi" || opcode == "mul" || "sdiv") {
+    if (opcode == "add" || opcode == "addi" || opcode == "mul" || "sdiv" || opcode == "and") {
       ss >> leftStr >> rightStr;
 
       // Remove commas
@@ -235,8 +235,6 @@ void commitmentGenerator() {
 
       if (opcode == "add" || opcode == "addi") {
         A[1+n_i+i][0] = 1;
-        // if (std::isdigit(leftStr[0])) {
-          // leftInt = std::stoi(leftStr);
         if (std::isdigit(leftStr[0]) || (leftStr[0] == '#' && leftStr.size() > 1 && std::isdigit(leftStr[1]))) {
           leftInt = std::stoi(leftStr[0] == '#' ? leftStr.substr(1) : leftStr);
           B[1+n_i+i][0] = leftInt;
@@ -250,8 +248,6 @@ void commitmentGenerator() {
           }
           B[1+n_i+i][li] = 1;
         }
-        // if(std::isdigit(rightStr[0])){
-        //   rightInt = std::stoi(rightStr);
         
         if (std::isdigit(rightStr[0]) || (rightStr[0] == '#' && rightStr.size() > 1 && std::isdigit(rightStr[1]))) {
           rightInt = std::stoi(rightStr[0] == '#' ? rightStr.substr(1) : rightStr);
@@ -268,8 +264,6 @@ void commitmentGenerator() {
         }
 
     } else if (opcode == "mul") {
-        // if (std::isdigit(leftStr[0])) {
-        //   leftInt = std::stoi(leftStr);
         if (std::isdigit(leftStr[0]) || (leftStr[0] == '#' && leftStr.size() > 1 && std::isdigit(leftStr[1]))) {
           leftInt = std::stoi(leftStr[0] == '#' ? leftStr.substr(1) : leftStr);
           
@@ -284,8 +278,6 @@ void commitmentGenerator() {
           }
           A[1+n_i+i][li] = 1;
         }
-        // if (std::isdigit(rightStr[0])) {
-        //   rightInt = std::stoi(rightStr);
         if (std::isdigit(rightStr[0]) || (rightStr[0] == '#' && rightStr.size() > 1 && std::isdigit(rightStr[1]))) {
           rightInt = std::stoi(rightStr[0] == '#' ? rightStr.substr(1) : rightStr);
           
@@ -300,11 +292,11 @@ void commitmentGenerator() {
           }
           B[1+n_i+i][ri] = 1;
         }
+      } else if (opcode == "and") {
+        
       }
       rd_latest_used[registerMap[rd]] = (1 + n_i + i);
-    }
-    
-    else {
+    } else {
       cout << "commitmentGenerator cannot recognize " << opcode << " instruction in the code_block range. The code_block range is defind in the device_config.json file.\n";
       std::exit(0);
     }
