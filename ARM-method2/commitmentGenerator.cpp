@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Compile your code based on your operating system.
+// `g++ -std=c++17 commitmentGenerator.cpp lib/polynomial.cpp -o commitmentGenerator -lstdc++`
+
 
 #include "lib/polynomial.h"
 #include <iostream>
