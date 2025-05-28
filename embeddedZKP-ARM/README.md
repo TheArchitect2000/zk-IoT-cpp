@@ -45,6 +45,7 @@ In this step, you’ll add the IOT2050 device to your user account on an IoT ser
 1. **Create an Account:**  
    - Sign up on an IoT server like [**zkSensor Panel**](https://panel.zksensor.tech).  
 
+
 2. **Connect to Your IOT2050 Device:**  
    - Use SSH or a serial console to connect.  
 
@@ -65,8 +66,13 @@ In this step, you’ll add the IOT2050 device to your user account on an IoT ser
 ```
 
 # 🚩 Step 2: Commitment Generation
-In this step, you should generate a commitment for your program on IOT2050 and submit it on the Fidesinnova public network.
+Compile your code based on your operating system.
+- 
+```
+g++ -std=c++17 commitmentGenerator.cpp lib/polynomial.cpp -o commitmentGenerator -lstdc++
+```
 
+In this step, you should generate a commitment for your program on IOT2050 and submit it on the Fidesinnova public network.
 - Install necessary libraries on IOT2050
 ```
 sudo apt update && sudo apt install -y g++ libmosquitto-dev libmosquittopp-dev
