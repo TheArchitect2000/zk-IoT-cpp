@@ -49,7 +49,7 @@ std::unordered_map<std::string, int> registerMap = {
 
 uint64_t n_i, n_g, m, n, p, g;
 
-std::string configFile = "device_config.json", setupFile, assemblyFile = "program.s", newAssemblyFile = "program_new.s";
+std::string configFilePath = "device_config.json", setupFilePath, assemblyFilePath = "program.s", newAssemblyFile = "program_new.s", commitmentFileName, paramFileName;
 
 std::vector<std::string> instructions;
 uint64_t Class;
@@ -102,11 +102,10 @@ std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFile, n
 }
 
 // Function to read specified lines from assembly file
-std::vector<std::string> readAssemblyLines(const std::string &assemblyFile, uint64_t startLine, uint64_t endLine) {
-  std::ifstream assemblyFileStream(assemblyFile);
+std::vector<std::string> readAssemblyLines(const std::string &assemblyFilePath, uint64_t startLine, uint64_t endLine) {
+  std::ifstream assemblyFileStream(assemblyFilePath);
   if (!assemblyFileStream.is_open()) {
-      std::cerr << "Error opening assembly file: " << assemblyFile << std::endl;
-      exit(EXIT_FAILURE);
+      throw std::runtime_error("Error opening assembly file: " + assemblyFilePath);
   }
 
   std::vector<std::string> selectedLines;
@@ -115,29 +114,33 @@ std::vector<std::string> readAssemblyLines(const std::string &assemblyFile, uint
 
   while (std::getline(assemblyFileStream, line)) {
       if (currentLineNumber >= startLine && currentLineNumber <= endLine) {
-          selectedLines.push_back(line);
+        selectedLines.push_back(line);
       }
       ++currentLineNumber;
   }
 
   assemblyFileStream.close();
+  
+  if (selectedLines.empty()) {
+    throw std::runtime_error("The code_block range contains blank lines. Please check the device_config.json file.");
+  }
+
   return selectedLines;
 }
 
 vector<vector<uint64_t>> vector_z(2, vector<uint64_t>(2, 0ll));
 
 // Function to modify assembly file content and save to new file
-void modifyAndSaveAssembly(const std::string &assemblyFile, const std::string &newAssemblyFile, uint64_t startLine, uint64_t endLine) {
-  std::ifstream assemblyFileStream(assemblyFile);
+void modifyAndSaveAssembly(const std::string &assemblyFilePath, const std::string &newAssemblyFile, uint64_t startLine, uint64_t endLine) {
+  std::ifstream assemblyFileStream(assemblyFilePath);
   if (!assemblyFileStream.is_open()) {
-      std::cerr << "Error opening assembly file: " << assemblyFile << std::endl;
+      std::cerr << "Error opening assembly file: " << assemblyFilePath << std::endl;
       exit(EXIT_FAILURE);
   }
 
   std::ofstream newAssemblyFileStream(newAssemblyFile);
   if (!newAssemblyFileStream.is_open()) {
-      std::cerr << "Error creating new assembly file: " << newAssemblyFile << std::endl;
-      exit(EXIT_FAILURE);
+    throw std::runtime_error("commitmentGenerator cannot open " + newAssemblyFile + "for writing proposes\n");
   }
 
   std::string line;
@@ -319,12 +322,12 @@ void modifyAndSaveAssembly(const std::string &assemblyFile, const std::string &n
 
 
 void commitmentGenerator() {
-  setupFile = "data/setup";
-  setupFile += to_string(Class);
-  setupFile += ".json";
-  std::ifstream setupFileStream(setupFile);
+  setupFilePath = "data/setup";
+  setupFilePath += to_string(Class);
+  setupFilePath += ".json";
+  std::ifstream setupFileStream(setupFilePath);
   if (!setupFileStream.is_open()) {
-      std::cerr << "Could not open the file!" << std::endl;
+      throw std::runtime_error("commitmentGenerator cannot open " + setupFilePath + " for reading proposes.\n");
   }
   nlohmann::json setupJsonData;
   setupFileStream >> setupJsonData;
@@ -662,13 +665,13 @@ void commitmentGenerator() {
   // Serialize JSON object to a string
   std::string commitmentString = commitment.dump(4);
   // Write JSON object to a file
-  std::ofstream commitmentFile("data/program_commitment.json");
+  std::ofstream commitmentFile(commitmentFileName);
   if (commitmentFile.is_open()) {
       commitmentFile << commitmentString;
       commitmentFile.close();
-      std::cout << "JSON data has been written to program_commitment.json\n";
+      std::cout << commitmentFileName << " is created successfully\n";
   } else {
-      std::cerr << "Error opening file for writing\n";
+      std::cerr << "commitmentGenerator cannot open " <<  commitmentFileName << "for writing proposes\n";
   }
 
   vector<vector<uint64_t>> nonZeroB;
@@ -693,17 +696,17 @@ void commitmentGenerator() {
   // Serialize JSON object to a string
   std::string program_paramString = program_param.dump(4);
   // Write JSON object to a file
-  std::ofstream program_paramFile("data/program_param.json");
+  std::ofstream program_paramFile(paramFileName);
   if (program_paramFile.is_open()) {
       program_paramFile << program_paramString;
       program_paramFile.close();
-      std::cout << "JSON data has been written to program_param.json\n";
+      std::cout << paramFileName << " is created successfully\n";
   } else {
-      std::cerr << "Error opening file for writing\n";
+      std::cerr << "commitmentGenerator cannot open " <<  paramFileName << "for writing proposes\n";
   }
 }
 
-int main() {
+int main(int argc, char* argv[]) {
   // TODO: Remove the hard coded file names and use the inputs from user
 
   // std::string configFile, setupFile, assemblyFile, newAssemblyFile;
@@ -717,14 +720,19 @@ int main() {
   // std::cout << "Enter the output file name for modified assembly: ";
   // std::cin >> newAssemblyFile;
 
+  assemblyFilePath = argv[1];
+  newAssemblyFile = assemblyFilePath;// + "_new.s";
+  newAssemblyFile = newAssemblyFile.substr(0, newAssemblyFile.find_last_of('.')) + "_AddedFidesProofGen.s";
+  commitmentFileName = assemblyFilePath;
+  commitmentFileName = commitmentFileName.substr(0, commitmentFileName.find_last_of('.')) + "_commitment.json";
+  paramFileName = assemblyFilePath;
+  paramFileName = paramFileName.substr(0, paramFileName.find_last_of('.')) + "_param.json";
+  
   nlohmann::json config;
-  auto [startLine, endLine] = parseDeviceConfig(configFile, config);
+  auto [startLine, endLine] = parseDeviceConfig(configFilePath, config);
 
-  modifyAndSaveAssembly(assemblyFile, newAssemblyFile, startLine, endLine);
-
-  std::cout << "Modified assembly file saved as: " << newAssemblyFile << std::endl;
-
-  // TODO: update this part to be dynamic
+  modifyAndSaveAssembly(assemblyFilePath, newAssemblyFile, startLine, endLine);
   commitmentGenerator();
+  cout << newAssemblyFile << " is created successfully\n";
   return 0;
 }
