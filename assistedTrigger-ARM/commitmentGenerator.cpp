@@ -69,7 +69,7 @@ string softwareVersion;
 std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFilePath, nlohmann::json &config) {
   std::ifstream configFileStream(configFilePath, std::ifstream::binary);
   if (!configFileStream.is_open()) {
-      throw std::runtime_error("Error: commitmentGenerator cannot open " + configFilePath + " for reading proposes.\n");
+      throw std::runtime_error("Error: Fides commitmentGenerator cannot open " + configFilePath + " for reading proposes.\n");
   }
 
   configFileStream >> config;
@@ -88,7 +88,7 @@ std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFilePat
 
   std::ifstream classFileStream("class.json");
   if (!classFileStream.is_open()) {
-      throw std::runtime_error("Error: commitmentGenerator cannot open class.json for reading proposes.\n");
+      throw std::runtime_error("Error: Fides commitmentGenerator cannot open class.json for reading proposes.\n");
   }
   nlohmann::json classJsonData;
   classFileStream >> classJsonData;
@@ -108,7 +108,7 @@ std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFilePat
 std::vector<std::string> readAssemblyLines(const std::string &assemblyFilePath, uint64_t startLine, uint64_t endLine) {
   std::ifstream assemblyFileStream(assemblyFilePath);
   if (!assemblyFileStream.is_open()) {
-    throw std::runtime_error("Error: commitmentGenerator cannot open " + assemblyFilePath + " for reading proposes.\n");
+    throw std::runtime_error("Error: Fides commitmentGenerator cannot open " + assemblyFilePath + " for reading proposes.\n");
   }
 
   std::vector<std::string> selectedLines;
@@ -163,7 +163,7 @@ std::vector<std::string> modifyAssembly(const std::vector<std::string> &original
 void writeToFile(const std::string &filePath, const std::vector<std::string> &content) {
     std::ofstream fileStream(filePath);
     if (!fileStream.is_open()) {
-        throw std::runtime_error("Error: commitmentGenerator cannot open " + filePath + "for writing proposes\n");
+        throw std::runtime_error("Error: Fides commitmentGenerator cannot open " + filePath + "for writing proposes\n");
     }
 
     for (const auto &line : content) {
@@ -179,7 +179,7 @@ void commitmentGenerator() {
   setupFilePath += ".json";
   std::ifstream setupFileStream(setupFilePath);
   if (!setupFileStream.is_open()) {
-      throw std::runtime_error("Error: commitmentGenerator cannot open " + setupFilePath + " for reading proposes.\n");
+      throw std::runtime_error("Error: Fides commitmentGenerator cannot open " + setupFilePath + " for reading proposes.\n");
   }
   nlohmann::json setupJsonData;
   setupFileStream >> setupJsonData;
@@ -509,7 +509,7 @@ void commitmentGenerator() {
       commitmentFile.close();
       std::cout << commitmentFileName << " is created successfully\n";
   } else {
-      std::cerr << "commitmentGenerator cannot open " <<  commitmentFileName << "for writing proposes\n";
+    throw std::runtime_error("Error: Fides commitmentGenerator cannot open " + commitmentFileName + " for writing proposes\n");\
   }
 
   vector<vector<uint64_t>> nonZeroB;
@@ -540,7 +540,7 @@ void commitmentGenerator() {
       program_paramFile.close();
       std::cout << paramFileName << " is created successfully\n";
   } else {
-      std::cerr << "commitmentGenerator cannot open " <<  paramFileName << "for writing proposes\n";
+    throw std::runtime_error("Error: Fides commitmentGenerator cannot open " + paramFileName + " for writing proposes\n");
   }
 }
 

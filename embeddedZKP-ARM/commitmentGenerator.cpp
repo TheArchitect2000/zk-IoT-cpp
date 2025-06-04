@@ -64,8 +64,7 @@ string softwareVersion;
 std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFile, nlohmann::json &config) {
   std::ifstream configFileStream(configFile, std::ifstream::binary);
   if (!configFileStream.is_open()) {
-      std::cerr << "Error opening config file: " << configFile << std::endl;
-      exit(EXIT_FAILURE);
+      throw std::runtime_error("Error: Fides commitmentGenerator cannot open " + configFile + " for reading proposes.\n");
   }
 
   configFileStream >> config;
@@ -85,7 +84,7 @@ std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFile, n
   
   std::ifstream classFileStream("class.json");
   if (!classFileStream.is_open()) {
-      std::cerr << "Could not open the file!" << std::endl;
+    throw std::runtime_error("Error: Fides commitmentGenerator cannot open class.json for reading proposes.\n");
   }
   nlohmann::json classJsonData;
   classFileStream >> classJsonData;
@@ -105,7 +104,7 @@ std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFile, n
 std::vector<std::string> readAssemblyLines(const std::string &assemblyFilePath, uint64_t startLine, uint64_t endLine) {
   std::ifstream assemblyFileStream(assemblyFilePath);
   if (!assemblyFileStream.is_open()) {
-      throw std::runtime_error("Error opening assembly file: " + assemblyFilePath);
+    throw std::runtime_error("Error: Fides commitmentGenerator cannot open " + assemblyFilePath + " for reading proposes.\n");
   }
 
   std::vector<std::string> selectedLines;
@@ -122,7 +121,7 @@ std::vector<std::string> readAssemblyLines(const std::string &assemblyFilePath, 
   assemblyFileStream.close();
   
   if (selectedLines.empty()) {
-    throw std::runtime_error("The code_block range contains blank lines. Please check the device_config.json file.");
+    throw std::runtime_error("Error: The code_block range contains blank lines. Please check the device_config.json file.");
   }
 
   return selectedLines;
@@ -134,13 +133,12 @@ vector<vector<uint64_t>> vector_z(2, vector<uint64_t>(2, 0ll));
 void modifyAndSaveAssembly(const std::string &assemblyFilePath, const std::string &newAssemblyFile, uint64_t startLine, uint64_t endLine) {
   std::ifstream assemblyFileStream(assemblyFilePath);
   if (!assemblyFileStream.is_open()) {
-      std::cerr << "Error opening assembly file: " << assemblyFilePath << std::endl;
-      exit(EXIT_FAILURE);
+    throw std::runtime_error("Error: Fides commitmentGenerator cannot open " + assemblyFilePath + " for reading proposes.\n");
   }
 
   std::ofstream newAssemblyFileStream(newAssemblyFile);
   if (!newAssemblyFileStream.is_open()) {
-    throw std::runtime_error("commitmentGenerator cannot open " + newAssemblyFile + "for writing proposes\n");
+    throw std::runtime_error("Error: Fides commitmentGenerator cannot open " + newAssemblyFile + " for writing proposes.\n");
   }
 
   std::string line;
@@ -327,7 +325,7 @@ void commitmentGenerator() {
   setupFilePath += ".json";
   std::ifstream setupFileStream(setupFilePath);
   if (!setupFileStream.is_open()) {
-      throw std::runtime_error("commitmentGenerator cannot open " + setupFilePath + " for reading proposes.\n");
+    throw std::runtime_error("Error: Fides commitmentGenerator cannot open " + setupFilePath + " for reading proposes.\n");
   }
   nlohmann::json setupJsonData;
   setupFileStream >> setupJsonData;
@@ -463,8 +461,7 @@ void commitmentGenerator() {
     }
     
     else {
-      cout << "!!! Undefined instruction in the defiend Line range !!!\n" << opcode << endl;
-      std::exit(0);
+      throw std::runtime_error("Error: Fides commitmentGenerator program cannot recognize the opcode << " + opcode + " >> within the specified code_block range. The code_block range is defined in the device_config.json file.\n");
     }
   }
 
@@ -671,7 +668,7 @@ void commitmentGenerator() {
       commitmentFile.close();
       std::cout << commitmentFileName << " is created successfully\n";
   } else {
-      std::cerr << "commitmentGenerator cannot open " <<  commitmentFileName << "for writing proposes\n";
+    throw std::runtime_error("Error: Fides commitmentGenerator cannot open " + commitmentFileName + " for writing proposes.\n");\
   }
 
   vector<vector<uint64_t>> nonZeroB;
@@ -702,7 +699,7 @@ void commitmentGenerator() {
       program_paramFile.close();
       std::cout << paramFileName << " is created successfully\n";
   } else {
-      std::cerr << "commitmentGenerator cannot open " <<  paramFileName << "for writing proposes\n";
+    throw std::runtime_error("Error: Fides commitmentGenerator cannot open " + paramFileName + " for writing proposes.\n");
   }
 }
 
@@ -731,6 +728,16 @@ int main(int argc, char* argv[]) {
   nlohmann::json config;
   auto [startLine, endLine] = parseDeviceConfig(configFilePath, config);
 
+  if((endLine - startLine)+1 != n_g) {
+    throw std::runtime_error(
+      "Error: The 'code_block' range in device_config.json does not match the number of supported instructions (n_g) for the selected 'class'. "
+      "Please verify the 'code_block' and 'class' values in device_config.json."
+    );
+  }
+    
+  cout << "startLine: " << startLine << endl;
+  cout << "endLine: " << endLine << endl;
+  
   modifyAndSaveAssembly(assemblyFilePath, newAssemblyFile, startLine, endLine);
   commitmentGenerator();
   cout << newAssemblyFile << " is created successfully\n";
