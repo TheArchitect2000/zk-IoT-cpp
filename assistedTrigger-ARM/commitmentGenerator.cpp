@@ -69,7 +69,7 @@ string softwareVersion;
 std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFilePath, nlohmann::json &config) {
   std::ifstream configFileStream(configFilePath, std::ifstream::binary);
   if (!configFileStream.is_open()) {
-      throw std::runtime_error("commitmentGenerator cannot open " + configFilePath + " for reading proposes.\n");
+      throw std::runtime_error("Error: commitmentGenerator cannot open " + configFilePath + " for reading proposes.\n");
   }
 
   configFileStream >> config;
@@ -88,7 +88,7 @@ std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFilePat
 
   std::ifstream classFileStream("class.json");
   if (!classFileStream.is_open()) {
-      throw std::runtime_error("commitmentGenerator cannot open class.json for reading proposes.\n");
+      throw std::runtime_error("Error: commitmentGenerator cannot open class.json for reading proposes.\n");
   }
   nlohmann::json classJsonData;
   classFileStream >> classJsonData;
@@ -108,7 +108,7 @@ std::pair<uint64_t, uint64_t> parseDeviceConfig(const std::string &configFilePat
 std::vector<std::string> readAssemblyLines(const std::string &assemblyFilePath, uint64_t startLine, uint64_t endLine) {
   std::ifstream assemblyFileStream(assemblyFilePath);
   if (!assemblyFileStream.is_open()) {
-        throw std::runtime_error("Error opening assembly file: " + assemblyFilePath);
+    throw std::runtime_error("Error: commitmentGenerator cannot open " + assemblyFilePath + " for reading proposes.\n");
   }
 
   std::vector<std::string> selectedLines;
@@ -125,7 +125,7 @@ std::vector<std::string> readAssemblyLines(const std::string &assemblyFilePath, 
   assemblyFileStream.close();
   
   if (selectedLines.empty()) {
-    throw std::runtime_error("The code_block range contains blank lines. Please check the device_config.json file.");
+    throw std::runtime_error("Error: The code_block range contains blank lines. Please check the device_config.json file.");
   }
 
   return selectedLines;
@@ -140,13 +140,17 @@ std::vector<std::string> modifyAssembly(const std::vector<std::string> &original
 
     for (size_t i = 0; i < originalLines.size(); ++i) {
       if (i + 1 == startLine) {
-          modifiedLines.push_back(".global zkp_start\nzkp_start: nop\n" + originalLines[i]);
+          modifiedLines.push_back(".global zkp_start");
+          modifiedLines.push_back("zkp_start: nop");
+          modifiedLines.push_back(originalLines[i]);
           instructions.push_back(originalLines[i]);
       } else if (i + 1 > startLine && i + 1 <= endLine) {
           modifiedLines.push_back(originalLines[i]);
           instructions.push_back(originalLines[i]);
       } else if (i + 1 == endLine + 1) {
-          modifiedLines.push_back(".global zkp_end\nzkp_end: nop\n" + originalLines[i]);
+          modifiedLines.push_back(".global zkp_end");
+          modifiedLines.push_back("zkp_end: nop");
+          modifiedLines.push_back(originalLines[i]);
       } else {
           modifiedLines.push_back(originalLines[i]);
       }
@@ -159,7 +163,7 @@ std::vector<std::string> modifyAssembly(const std::vector<std::string> &original
 void writeToFile(const std::string &filePath, const std::vector<std::string> &content) {
     std::ofstream fileStream(filePath);
     if (!fileStream.is_open()) {
-        throw std::runtime_error("commitmentGenerator cannot open " + filePath + "for writing proposes\n");
+        throw std::runtime_error("Error: commitmentGenerator cannot open " + filePath + "for writing proposes\n");
     }
 
     for (const auto &line : content) {
@@ -175,7 +179,7 @@ void commitmentGenerator() {
   setupFilePath += ".json";
   std::ifstream setupFileStream(setupFilePath);
   if (!setupFileStream.is_open()) {
-      throw std::runtime_error("commitmentGenerator cannot open " + setupFilePath + " for reading proposes.\n");
+      throw std::runtime_error("Error: commitmentGenerator cannot open " + setupFilePath + " for reading proposes.\n");
   }
   nlohmann::json setupJsonData;
   setupFileStream >> setupJsonData;
@@ -220,7 +224,7 @@ void commitmentGenerator() {
     uint64_t li = 0;
     uint64_t ri = 0;
 
-    if (opcode == "add" || opcode == "addi" || opcode == "mul" || "sdiv" || opcode == "and") {
+    if (opcode == "add" || opcode == "addi" || opcode == "mul") {
       ss >> leftStr >> rightStr;
 
       // Remove commas
@@ -295,13 +299,10 @@ void commitmentGenerator() {
           }
           B[1+n_i+i][ri] = 1;
         }
-      } else if (opcode == "and") {
-        
       }
       rd_latest_used[registerMap[rd]] = (1 + n_i + i);
     } else {
-      cout << "commitmentGenerator cannot recognize " << opcode << " instruction in the code_block range. The code_block range is defind in the device_config.json file.\n";
-      std::exit(0);
+      throw std::runtime_error("Error: Fides commitmentGenerator program cannot recognize the opcode << " + opcode + " >> within the specified code_block range. The code_block range is defined in the device_config.json file.\n");
     }
   }
 
@@ -565,19 +566,51 @@ int main(int argc, char* argv[]) {
   paramFileName = paramFileName.substr(0, paramFileName.find_last_of('.')) + "_param.json";
   nlohmann::json config;
   auto [startLine, endLine] = parseDeviceConfig(configFilePath, config);
+  if((endLine - startLine)+1 != n_g) {
+    throw std::runtime_error(
+      "Error: The 'code_block' range in device_config.json does not match the number of supported instructions (n_g) for the selected 'class'. "
+      "Please verify the 'code_block' and 'class' values in device_config.json."
+    );
+  }
   cout << "startLine: " << startLine << endl;
-  cout << "startLine: " << endLine << endl;
+  cout << "endLine: " << endLine << endl;
   // modifyAndSaveAssembly(assemblyFilePath, newAssemblyFile, startLine, endLine);
 
   auto originalLines = readAssemblyLines(assemblyFilePath, startLine, endLine);
-  for (const auto& i : originalLines) {
-      std::cout << "originalLines: " << i << std::endl;
-  }
+  // for (const auto& i : originalLines) {
+  //     std::cout << "originalLines: " << i << std::endl;
+  // }
 
   auto modifiedLines = modifyAssembly(originalLines, startLine, endLine);
-  for (const auto& j : modifiedLines) {
-      std::cout << "modifiedLines: " << j << std::endl;
+  uint64_t startLineIndex = (startLine > 3) ? startLine - 3 : 0;
+  uint64_t endLineIndex = (endLine < modifiedLines.size()) ? endLine : modifiedLines.size() - 1;
+  for (uint64_t i = startLineIndex; i <= startLineIndex + 5; i++) {
+      if(i == startLine-1 || i == startLine) {
+        std::cout << to_string(i+1) << "(added)\t" << modifiedLines[i] << std::endl;
+      }
+      else if(i > startLine) {
+        std::cout << to_string(i+1) << "(" << to_string(i-1) << ")\t" << modifiedLines[i] << std::endl;
+      }
+      else {
+        std::cout << to_string(i+1) << "\t" << modifiedLines[i] << std::endl;
+      }
   }
+  std::cout << "..." << std::endl;
+  for (uint64_t i = endLineIndex; i <= endLineIndex + 5; i++) {
+      if(i < endLineIndex + 2) {
+        std::cout << to_string(i+1) << "(" << to_string(i-1) << ")\t" << modifiedLines[i] << std::endl;
+      }
+      else if(i >= endLineIndex + 4) {
+        std::cout << to_string(i+1) << "(" << to_string(i-1) << ")\t" << modifiedLines[i] << std::endl;
+      }
+      else {
+        std::cout << to_string(i+1) << "(added)\t" << modifiedLines[i] << std::endl;
+      }
+  }
+  
+  // for (const auto& j : modifiedLines) {
+  //     std::cout << "modifiedLines: " << j << std::endl;
+  // }
 
 
   // TODO: update this part to be dynamic
