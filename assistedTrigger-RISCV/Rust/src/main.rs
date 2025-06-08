@@ -1,62 +1,31 @@
-use expectrl::{spawn, Regex, Session};
-use std::time::Duration;
+use plonky2::field::goldilocks_field::GoldilocksField;
+use plonky2::field::types::Field;
+use plonky2::field::types::PrimeField64;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut gdb = spawn("riscv64-unknown-elf-gdb test.elf")?;
-    gdb.set_expect_timeout(Some(Duration::from_secs(10)));
+use riscv_trace_reader::{run_qemu, parse_trace, convert_trace_to_rows, prove_addition_constraint};
 
-    // Wait for GDB prompt
-    let initial = gdb.expect(Regex(".*gdb.*"))?;
-    println!("Initial output: {:?}", initial);
+fn main() {
+    let bin = "./test.bin";
+    let trace = "./traces/qemu_trace.log";
 
-    // Send a command
-    gdb.send_line("info registers")?;
-
-    // Read response
-    let response = gdb.expect(Regex(".*ra.*"))?; // Match register output like `ra`
-    println!("Register output: {:?}", response);
-
-    Ok(())
-}
-
-// Helper to parse a MI value string like: ^done,value="0x0000000000010194"
-fn parse_value(line: &str) -> Result<u64> {
-    let re = Regex::new(r#"value="0x([0-9a-fA-F]+)""#)?;
-    let cap = re.captures(line).ok_or_else(|| anyhow::anyhow!("No match"))?;
-    Ok(u64::from_str_radix(&cap[1], 16)?)
-}
-
-// Helper to parse register values
-fn parse_registers(output: &str) -> Result<Vec<u64>> {
-    let mut values = Vec::new();
-    let re = Regex::new(r#""value":"0x([0-9a-fA-F]+)""#)?;
-    for cap in re.captures_iter(output) {
-        values.push(u64::from_str_radix(&cap[1], 16)?);
+    run_qemu(bin, trace);
+    let parsed = parse_trace(trace);
+    let rows = convert_trace_to_rows(&parsed);
+    
+    for (i, row) in rows.iter().enumerate() {
+        println!("Row {}: opcode = {}", i, row.opcode.to_canonical_u64());
     }
-    Ok(values)
+
+    let add_opcode = GoldilocksField::from_canonical_u64(1);
+
+    if let Some(first_add) = rows.iter().find(|row| row.opcode == add_opcode) {
+        let a = first_add.rs1_val.to_canonical_u64();
+        let b = first_add.rs2_val.to_canonical_u64();
+        let c = first_add.rd_val.to_canonical_u64();
+
+        let proof = prove_addition_constraint(a, b, c);
+        println!("Proof generated: {:?}", proof.public_inputs);
+    } else {
+        println!("No ADD instructions found.");
+    }
 }
-
-
-
-// mod trace;
-// use trace::parse_qemu_trace;
-// use std::error::Error;
-
-// fn main() -> Result<(), Box<dyn Error>> {
-//     let entries = parse_qemu_trace("qemu.log")?;
-//     for entry in entries {
-//         println!("Trace {}: {}", entry.trace_num, entry.label);
-//         println!("PC: {:#x}", entry.pc);
-//         println!("Instructions:");
-//         for instr in &entry.instructions {
-//             println!("  {}", instr);
-//         }
-//         println!("Registers:");
-//         for (i, reg) in entry.regs.iter().enumerate() {
-//             println!("  x{}: {:#018x}", i, reg);
-//         }
-//         println!("\n-------------------------\n");
-//     }
-//     Ok(())
-// }
-

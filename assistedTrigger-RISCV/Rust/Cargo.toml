@@ -1,9 +1,17 @@
 [package]
-name = "trace_parser"
+name = "riscv_trace_reader"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-expectrl = "0.7"
-anyhow = "1.0"
-regex = "1.10"
+plonky2 = "1.1.0"
+regex = "1"
+log = "0.4"
+
+[lib]
+name = "riscv_trace_reader"
+path = "src/lib.rs"
+
+[[bin]]
+name = "main"
+path = "src/main.rs"

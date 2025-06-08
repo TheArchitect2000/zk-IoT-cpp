@@ -1,0 +1,8 @@
+pub mod trace_parser;
+pub mod zk;
+
+pub use trace_parser::{TraceEntry, run_qemu, parse_trace};
+pub use zk::{InstructionRow, convert_trace_to_rows};
+
+pub mod circuit;
+pub use circuit::prove_addition_constraint;
