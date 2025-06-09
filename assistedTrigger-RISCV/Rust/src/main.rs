@@ -2,13 +2,14 @@ use plonky2::field::goldilocks_field::GoldilocksField;
 use plonky2::field::types::Field;
 use plonky2::field::types::PrimeField64;
 
-use riscv_trace_reader::{run_qemu, parse_trace, convert_trace_to_rows, prove_addition_constraint};
+use riscv_trace_reader::{run_qemu, parse_trace, convert_trace_to_rows, prove_addition_constraint, InstructionRow};
+use riscv_trace_reader::verifier::verify_addition_proof;
 
 fn main() {
     let bin = "./test.bin";
-    let trace = "./traces/qemu_trace.log";
+    let trace = "./traces/sample_trace.log";
 
-    run_qemu(bin, trace);
+    // run_qemu(bin, trace);
     let parsed = parse_trace(trace);
     let rows = convert_trace_to_rows(&parsed);
     
@@ -23,9 +24,16 @@ fn main() {
         let b = first_add.rs2_val.to_canonical_u64();
         let c = first_add.rd_val.to_canonical_u64();
 
-        let proof = prove_addition_constraint(a, b, c);
+        let (proof, circuit) = prove_addition_constraint(a, b, c);
         println!("Proof generated: {:?}", proof.public_inputs);
+        
+        if verify_addition_proof(proof, &circuit) {
+            println!("✅ Proof verification succeeded.");
+        } else {
+            println!("❌ Proof verification failed.");
+        }
     } else {
-        println!("No ADD instructions found.");
+        println!("No instructions found.");
     }
+
 }

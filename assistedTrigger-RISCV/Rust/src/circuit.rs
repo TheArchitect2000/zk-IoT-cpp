@@ -2,6 +2,7 @@ use plonky2::field::goldilocks_field::GoldilocksField;
 use plonky2::field::types::Field;
 use plonky2::plonk::circuit_builder::CircuitBuilder;
 use plonky2::plonk::circuit_data::CircuitConfig;
+use plonky2::plonk::circuit_data::CircuitData;
 use plonky2::plonk::config::PoseidonGoldilocksConfig;
 use plonky2::iop::witness::PartialWitness;
 use plonky2::plonk::prover::prove;
@@ -13,7 +14,10 @@ pub fn prove_addition_constraint(
     a: u64,
     b: u64,
     c: u64,
-) -> ProofWithPublicInputs<GoldilocksField, PoseidonGoldilocksConfig, 2> {
+) -> (
+    ProofWithPublicInputs<GoldilocksField, PoseidonGoldilocksConfig, 2>,
+    CircuitData<GoldilocksField, PoseidonGoldilocksConfig, 2>,
+) {
     let config = CircuitConfig::standard_recursion_config();
     let mut builder = CircuitBuilder::<GoldilocksField, 2>::new(config);
 
@@ -28,6 +32,8 @@ pub fn prove_addition_constraint(
     let mut pw = PartialWitness::new();
     let mut timing = TimingTree::new("prove", Level::Info);
 
-    prove(&data.prover_only, &data.common, pw, &mut timing)
-        .expect("Proof should succeed")
+    let proof = prove(&data.prover_only, &data.common, pw, &mut timing)
+        .expect("Proof should succeed");
+
+    (proof, data)
 }
